@@ -2,7 +2,8 @@ package flyway.asdistats;
 
 import fi.nls.oskari.domain.Role;
 import fi.nls.oskari.domain.User;
-import fi.nls.oskari.domain.map.OskariLayer;
+import fi.nls.oskari.map.layer.OskariLayerService;
+import fi.nls.oskari.service.OskariComponentManager;
 import fi.nls.oskari.service.ServiceException;
 import fi.nls.oskari.service.ServiceRuntimeException;
 import fi.nls.oskari.service.UserService;
@@ -16,6 +17,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Add permissions for regionset: countries
@@ -46,8 +48,14 @@ public class V1_2__add_permission_for_regionset implements JdbcMigration {
 
     // statslayers described as layer resources for permissions handling
     protected List<Resource> getResources() {
-        List<Resource> list = new ArrayList<>();
-        list.add(new OskariLayerResource(OskariLayer.TYPE_STATS, "resources://regionsets/ne_110m_countries-3575.json", "ne_110m_countries-3575"));
+        List<Resource> list = OskariComponentManager.getComponentOfType(OskariLayerService.class)
+                .findByUrlAndName("resources://regionsets/ne_110m_countries-3575.json", "ne_110m_countries-3575")
+                .stream().map(l -> {
+                    Resource res = new Resource();
+                    res.setType(ResourceType.maplayer);
+                    res.setMapping(Integer.toString(l.getId()));
+                    return res;
+                }).collect(Collectors.toList());
         return list;
     }
 
