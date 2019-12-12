@@ -6,7 +6,7 @@
     <parent>
         <groupId>asdi.oskari</groupId>
         <artifactId>asdi-parent</artifactId>
-        <version>1.18.0-SNAPSHOT</version>
+        <version>1.18.0</version>
     </parent>
     <artifactId>asdi-resources</artifactId>
     <packaging>jar</packaging>
