@@ -12,11 +12,10 @@
     <packaging>jar</packaging>
     <name>Resources for ASDI applications</name>
 
-    <build>
-        <resources>
-            <resource>
-                <directory>resources</directory>
-            </resource>
-        </resources>
-    </build>
+    <dependencies>
+        <dependency>
+            <groupId>org.oskari</groupId>
+            <artifactId>content-resources</artifactId>
+        </dependency>
+    </dependencies>
 </project>
