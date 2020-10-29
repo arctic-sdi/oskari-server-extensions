@@ -22,13 +22,16 @@ public class V1_23_1__migrate_layer_list extends BaseJavaMigration {
     private static final String LAYER_EDITOR_BUNDLE_NAME = "admin-layereditor";
 
     public void migrate(Context context) throws Exception {
-        if(PropertyUtil.getOptional("flyway.asdi.1_23_1.skip", true)) {
+        if(skipMigration()) {
             LOG.warn("You are skipping layer list migration.");
             return;
         }
         Connection connection = context.getConnection();
         createBundles(connection);
         updateDefaultAndUserViews(connection);
+    }
+    protected boolean skipMigration () {
+        return PropertyUtil.getOptional("flyway.asdi.1_23_1.skip", true);
     }
 
     private void createBundles(Connection connection) throws Exception {
