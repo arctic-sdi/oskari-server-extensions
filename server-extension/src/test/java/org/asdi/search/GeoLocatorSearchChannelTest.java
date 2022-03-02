@@ -20,7 +20,7 @@ public class GeoLocatorSearchChannelTest {
     private String wildcardQueryXML;
 
     public GeoLocatorSearchChannelTest() throws IOException {
-        this.wildcardQueryXML = IOHelper.readString(getClass().getResourceAsStream("ELFWildcardQuery.xml"));
+        this.wildcardQueryXML = IOHelper.readString(getClass().getResourceAsStream("GeoLocatorWildcardQuery.xml"));
     }
 
     @BeforeClass
@@ -39,9 +39,7 @@ public class GeoLocatorSearchChannelTest {
 
     @Test
     public void testWildcardQueryCreation() throws Exception {
-        System.out.println("getData");
-
-        PropertyUtil.addProperty("search.channel.ELFGEOLOCATOR_CHANNEL.service.url", "http://dummy.url");
+        PropertyUtil.addProperty("search.channel.GEOLOCATOR_CHANNEL.service.url", "http://dummy.url");
 
         GeoLocatorSearchChannel channel = new GeoLocatorSearchChannel();
         channel.init();
