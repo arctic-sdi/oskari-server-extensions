@@ -250,7 +250,7 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
 
         if ("true".equals(searchCriteria.getParamAsString(PARAM_FILTER))) {
             log.debug("Exact search (AU)");
-            
+
             // Exact search limited to AU region - case sensitive - no fuzzy support
             String request = REQUEST_GETFEATUREAU_TEMPLATE.replace(KEY_PLACE_HOLDER, URLEncoder.encode(searchCriteria.getSearchString(), "UTF-8"));
             request = request.replace(KEY_AU_HOLDER, URLEncoder.encode(searchCriteria.getParam(PARAM_REGION).toString(), "UTF-8"));
@@ -258,7 +258,7 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
             buf.append(request);
         } else if ("true".equals(searchCriteria.getParamAsString(PARAM_FUZZY))) {
             log.debug("Fuzzy search");
-            
+
             // Fuzzy search
             buf.append(REQUEST_FUZZY_TEMPLATE.replace(KEY_LANG_HOLDER, lang3));
             buf.append(URLEncoder.encode(searchCriteria.getSearchString(), "UTF-8"));
@@ -268,33 +268,33 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
             if (hasParam(searchCriteria, locationType)) {
                 buf.append("&LOCATIONTYPE" + "=" + searchCriteria.getParam(locationType));
             }
-            
+
             // Name language
             final String nameLanguage = "namelanguage";
             if (hasParam(searchCriteria, nameLanguage)) {
                 buf.append("&NAMELANGUAGE" + "=" + searchCriteria.getParam(nameLanguage));
             }
-            
+
             // Nearest
             final String nearest = "nearest";
             if (hasParam(searchCriteria, nearest)) {
                 buf.append("&NEAREST=" + searchCriteria.getParam(nearest));
                 buf.append("&LON=" + searchCriteria.getParam("lon"));
                 buf.append("&LAT=" + searchCriteria.getParam("lat"));
-                
+
                 // API supports EPSG:4258, EPSG:3034, EPSG:3035 ja EPSG:3857 coordinates
                 buf.append("&SRSNAME=" + searchCriteria.getSRS());
             }
         } else {
             log.debug("Exact search");
-            
+
             // Exact search - case sensitive
             String filter = getFilter(searchCriteria);
             String request = REQUEST_GETFEATURE_TEMPLATE.replace(KEY_LANG_HOLDER, lang3);
             buf.append(request);
             buf.append(filter);
         }
-        
+
         log.debug("Server request: " + buf.toString());
         return IOHelper.readString(getConnection(buf.toString()));
     }
@@ -350,7 +350,7 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
             ChannelSearchResult result = elfParser.parse(data, searchCriteria.getSRS(), locale, exonym);
 
             // Execute fuzzy search, if no result in exact search (and fuzzy search has not been done already)
-            if (result.getSearchResultItems().size() == 0 && findSearchMethod(searchCriteria).equals(PARAM_NORMAL) && !fuzzyDone) {
+            if (result.getSearchResultItems().isEmpty() && findSearchMethod(searchCriteria).equals(PARAM_NORMAL) && !fuzzyDone) {
                 // Try fuzzy search, if empty
                 searchCriteria.addParam(PARAM_NORMAL, "false");
                 searchCriteria.addParam(PARAM_FUZZY, "true");
@@ -367,19 +367,15 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     }
 
     private String findSearchMethod(SearchCriteria sc) {
-        String method = "unknown";
         if ("true".equals(sc.getParamAsString(PARAM_FILTER))) {
             // Exact search limited to AU region - case sensitive - no fuzzy support
-            method = PARAM_FILTER;
-
+            return PARAM_FILTER;
         } else if ("true".equals(sc.getParamAsString(PARAM_FUZZY))) {
             // Fuzzy search
-            method = PARAM_FUZZY;
-        } else {
-            // Exact search - case sensitive
-            method = PARAM_NORMAL;
+            return PARAM_FUZZY;
         }
-        return method;
+        // Exact search - case sensitive
+        return PARAM_NORMAL;
     }
 
     public Map<String, Double> getElfScalesForType() {
