@@ -44,15 +44,15 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     public static final String JSONKEY_LOCATIONTYPES = "SI_LocationTypes";
     public static final String LOCATIONTYPE_ID_PREFIX = "SI_LocationType.";
     public static final String PARAM_COUNTRY = "country";
-    public static final String REQUEST_REVERSEGEOCODE_TEMPLATE = PropertyUtil.get("search.channel.ELFGEOLOCATOR_CHANNEL.service.reversegeocode.template", DEFAULT_REVERSEGEOCODE_TEMPLATE);
-    public static final String REQUEST_GETFEATUREAU_TEMPLATE = PropertyUtil.get("search.channel.ELFGEOLOCATOR_CHANNEL.service.getfeatureau.template", DEFAULT_GETFEATUREAU_TEMPLATE);
-    public static final String REQUEST_FUZZY_TEMPLATE = PropertyUtil.get("search.channel.ELFGEOLOCATOR_CHANNEL.service.fuzzy.template", DEFAULT_FUZZY_TEMPLATE);
-    public static final String REQUEST_GETFEATURE_TEMPLATE = PropertyUtil.get("search.channel.ELFGEOLOCATOR_CHANNEL.service.getfeature.template", DEFAULT_GETFEATURE_TEMPLATE);
-    public static final String LOCATIONTYPE_ATTRIBUTES = PropertyUtil.get("search.channel.ELFGEOLOCATOR_CHANNEL.service.locationtype.json", ID + ".json");
-    public static final String PROPERTY_AUTOCOMPLETE_URL = PropertyUtil.getOptional("search.channel.ELFGEOLOCATOR_CHANNEL.autocomplete.url");
-    public static final String PROPERTY_AUTOCOMPLETE_USERNAME = PropertyUtil.getOptional("search.channel.ELFGEOLOCATOR_CHANNEL.autocomplete.userName");
-    public static final String PROPERTY_AUTOCOMPLETE_PASSWORD = PropertyUtil.getOptional("search.channel.ELFGEOLOCATOR_CHANNEL.autocomplete.password");
-    private static final String PROPERTY_SERVICE_LANG = "search.channel.ELFGEOLOCATOR_CHANNEL.lang";
+    public static final String REQUEST_REVERSEGEOCODE_TEMPLATE = PropertyUtil.get(getPropKey("service.reversegeocode.template"), DEFAULT_REVERSEGEOCODE_TEMPLATE);
+    public static final String REQUEST_GETFEATUREAU_TEMPLATE = PropertyUtil.get(getPropKey("service.getfeatureau.template"), DEFAULT_GETFEATUREAU_TEMPLATE);
+    public static final String REQUEST_FUZZY_TEMPLATE = PropertyUtil.get(getPropKey("service.fuzzy.template"), DEFAULT_FUZZY_TEMPLATE);
+    public static final String REQUEST_GETFEATURE_TEMPLATE = PropertyUtil.get(getPropKey("service.getfeature.template"), DEFAULT_GETFEATURE_TEMPLATE);
+    public static final String LOCATIONTYPE_ATTRIBUTES = PropertyUtil.get(getPropKey("service.locationtype.json"), ID + ".json");
+    public static final String PROPERTY_AUTOCOMPLETE_URL = PropertyUtil.getOptional(getPropKey("autocomplete.url"));
+    public static final String PROPERTY_AUTOCOMPLETE_USERNAME = PropertyUtil.getOptional(getPropKey("autocomplete.userName"));
+    public static final String PROPERTY_AUTOCOMPLETE_PASSWORD = PropertyUtil.getOptional(getPropKey("autocomplete.password"));
+    private static final String PROPERTY_SERVICE_LANG = getPropKey("lang");
 
     // Parameters
     public static final String PARAM_NORMAL = "normal";
@@ -75,6 +75,10 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     private String likeQueryXMLtemplate = null;
 
     public GeoLocatorSearchChannel() {
+    }
+
+    private static String getPropKey(String postfix) {
+        return "search.channel." + ID + "." + postfix;
     }
 
     public GeoLocatorSearchChannel(HttpURLConnection conn) {
