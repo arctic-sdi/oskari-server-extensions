@@ -48,7 +48,6 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     public static final String REQUEST_GETFEATUREAU_TEMPLATE = PropertyUtil.get(getPropKey("service.getfeatureau.template"), DEFAULT_GETFEATUREAU_TEMPLATE);
     public static final String REQUEST_FUZZY_TEMPLATE = PropertyUtil.get(getPropKey("service.fuzzy.template"), DEFAULT_FUZZY_TEMPLATE);
     public static final String REQUEST_GETFEATURE_TEMPLATE = PropertyUtil.get(getPropKey("service.getfeature.template"), DEFAULT_GETFEATURE_TEMPLATE);
-    public static final String LOCATIONTYPE_ATTRIBUTES = PropertyUtil.get(getPropKey("service.locationtype.json"), ID + ".json");
     public static final String PROPERTY_AUTOCOMPLETE_URL = PropertyUtil.getOptional(getPropKey("autocomplete.url"));
     public static final String PROPERTY_AUTOCOMPLETE_USERNAME = PropertyUtil.getOptional(getPropKey("autocomplete.userName"));
     public static final String PROPERTY_AUTOCOMPLETE_PASSWORD = PropertyUtil.getOptional(getPropKey("autocomplete.password"));
@@ -64,8 +63,6 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     private static Map<String, Double> elfScalesForType = new HashMap<>();
     private static Map<String, Integer> elfLocationPriority = new HashMap<>();
     private static JSONObject elfLocationTypes = null;
-    private static JSONObject elfNameLanguages = null;
-    private final String locationType = "GEOLOCATOR_CHANNEL.json";
     private String serviceURL = null;
     public GeoLocatorParser elfParser = null;
     private Logger log = LogFactory.getLogger(this.getClass());
@@ -113,15 +110,6 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
 
         log.debug("ServiceURL set to " + getURL());
         readLocationTypes();
-
-        // read available languages
-        try (InputStream languageStream = this.getClass().getResourceAsStream("namelanguage.json");
-             InputStreamReader reader = new InputStreamReader(languageStream)) {
-            elfNameLanguages = JSONHelper.createJSONObject4Tokener(new JSONTokener(reader));
-        } catch (IOException e) {
-            log.warn("Couldn't load language selection from 'namelanguage.json':", e.getMessage());
-        }
-
         elfParser = new GeoLocatorParser(getProperty("service.srs", "EPSG:4326"), this);
 
         try {
@@ -172,15 +160,9 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     }
 
     private InputStream getLocationTypeStream() {
-        InputStream inp2 = this.getClass().getResourceAsStream(locationType);
+        InputStream inp2 = this.getClass().getResourceAsStream("GEOLOCATOR_CHANNEL.json");
         if (inp2 != null) {
             return inp2;
-        }
-        // Try to get user defined setup file
-        try {
-            return new FileInputStream(LOCATIONTYPE_ATTRIBUTES);
-        } catch (Exception e) {
-            log.info("No setup found for location type based scaling in geolocator seach", e);
         }
         throw new RuntimeException("No location types data");
     }
@@ -340,14 +322,6 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     public boolean hasParam(SearchCriteria sc, final String param) {
         final Object obj = sc.getParam(param);
         return obj != null && !obj.toString().isEmpty();
-    }
-
-    public JSONObject getElfLocationTypes() {
-        return this.elfLocationTypes;
-    }
-
-    public JSONObject getElfNameLanguages() {
-        return this.elfNameLanguages;
     }
 
     /**
