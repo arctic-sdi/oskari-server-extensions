@@ -9,7 +9,6 @@
         <version>1.23.0-SNAPSHOT</version>
     </parent>
     <artifactId>server-extension</artifactId>
-
     <dependencies>
         <dependency>
             <groupId>org.oskari</groupId>
@@ -24,9 +23,8 @@
             <artifactId>service-control</artifactId>
         </dependency>
         <dependency>
-            <groupId>fi.nls.oskari.extras</groupId>
-            <artifactId>oskari-search-nls</artifactId>
-            <version>3.4</version>
+            <groupId>org.oskari</groupId>
+            <artifactId>service-search</artifactId>
         </dependency>
         <dependency>
             <groupId>org.oskari</groupId>
@@ -42,6 +40,12 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>xmlunit</groupId>
+            <artifactId>xmlunit</artifactId>
+            <version>${xmlunit.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

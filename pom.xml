@@ -13,6 +13,7 @@
         <project.build.soureEncoding>UTF-8</project.build.soureEncoding>
         <java.version>1.8</java.version>
         <oskari.version>2.6.0</oskari.version>
+        <xmlunit.version>1.6</xmlunit.version>
     </properties>
 
     <repositories>
