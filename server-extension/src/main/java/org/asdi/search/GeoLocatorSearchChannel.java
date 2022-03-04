@@ -441,9 +441,12 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
         return combiner.getSortedHits();
     }
 
+    private String getElasticQuery(String query) {
+        return getElasticQuery(query, USE_OLD_AUTOCOMPLETE);
+    }
 
-    protected String getElasticQuery(String query) {
-        if (USE_OLD_AUTOCOMPLETE) {
+    protected String getElasticQuery(String query, boolean useLegacy) {
+        if (useLegacy) {
             return getLegacyAutocomplete(query);
         }
         return getCurrentAutocomplete(query);
@@ -466,9 +469,9 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
         try {
             JSONObject placenamesuggest = new JSONObject();
             // query is insertion, otherlines are just boilerplate structure for query
-            placenamesuggest.put("prefix", query);
+            placenamesuggest.putOpt("prefix", query);
 
-            JSONObject completion = new JSONObject("{ 'field': 'name_suggest', 'skip_duplicates': true ");
+            JSONObject completion = new JSONObject("{ 'field': \"name_suggest\", \"skip_duplicates\": true }");
             placenamesuggest.put("completion", completion);
 
             JSONObject suggest = new JSONObject();
@@ -477,8 +480,8 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
             JSONObject root = new JSONObject();
             root.put("suggest", suggest);
             return root.toString();
-        } catch(Exception ignored) {
-            throw new ServiceRuntimeException("Error generating request payload for query: " + query);
+        } catch (Exception e) {
+            throw new ServiceRuntimeException("Error generating request payload for query: " + query, e);
         }
     }
 

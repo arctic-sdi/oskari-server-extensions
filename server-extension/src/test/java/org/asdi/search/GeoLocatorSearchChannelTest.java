@@ -55,10 +55,18 @@ public class GeoLocatorSearchChannelTest {
     }
 
     @Test
-    public void getElasticQuery() {
+    public void getElasticQueryLegacy() {
         GeoLocatorSearchChannel channel = new GeoLocatorSearchChannel();
         final JSONObject expected = JSONHelper.createJSONObject("{\"normal_search\":{\"text\":\"\\\"}, {\\\"break\\\": []\",\"completion\":{\"field\":\"name_suggest\",\"size\":20}},\"fuzzy_search\":{\"text\":\"\\\"}, {\\\"break\\\": []\",\"completion\":{\"field\":\"name_suggest\",\"size\":20,\"fuzzy\":{\"fuzziness\":5}}}}");
-        final JSONObject actual = JSONHelper.createJSONObject(channel.getElasticQuery("\"}, {\"break\": []"));
+        final JSONObject actual = JSONHelper.createJSONObject(channel.getElasticQuery("\"}, {\"break\": []", true));
+        assertTrue("JSON should not break", JSONHelper.isEqual(expected, actual));
+    }
+
+    @Test
+    public void getElasticQueryCurrent() {
+        GeoLocatorSearchChannel channel = new GeoLocatorSearchChannel();
+        final JSONObject expected = JSONHelper.createJSONObject("{\"suggest\":{\"placenamesuggest\":{\"completion\":{\"field\":\"name_suggest\",\"skip_duplicates\":true},\"prefix\":\"\\\"}, {\\\"break\\\": []\"}}}");
+        final JSONObject actual = JSONHelper.createJSONObject(channel.getElasticQuery("\"}, {\"break\": []", false));
         assertTrue("JSON should not break", JSONHelper.isEqual(expected, actual));
     }
 
