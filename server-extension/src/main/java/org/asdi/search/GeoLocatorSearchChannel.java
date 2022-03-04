@@ -48,10 +48,10 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     public static final String REQUEST_GETFEATUREAU_TEMPLATE = PropertyUtil.get(getPropKey("service.getfeatureau.template"), DEFAULT_GETFEATUREAU_TEMPLATE);
     public static final String REQUEST_FUZZY_TEMPLATE = PropertyUtil.get(getPropKey("service.fuzzy.template"), DEFAULT_FUZZY_TEMPLATE);
     public static final String REQUEST_GETFEATURE_TEMPLATE = PropertyUtil.get(getPropKey("service.getfeature.template"), DEFAULT_GETFEATURE_TEMPLATE);
-    public static final String LOCATIONTYPE_ATTRIBUTES = PropertyUtil.get(getPropKey("service.locationtype.json"), ID + ".json");
     public static final String PROPERTY_AUTOCOMPLETE_URL = PropertyUtil.getOptional(getPropKey("autocomplete.url"));
     public static final String PROPERTY_AUTOCOMPLETE_USERNAME = PropertyUtil.getOptional(getPropKey("autocomplete.userName"));
     public static final String PROPERTY_AUTOCOMPLETE_PASSWORD = PropertyUtil.getOptional(getPropKey("autocomplete.password"));
+    private static final boolean USE_OLD_AUTOCOMPLETE = PropertyUtil.getOptional(getPropKey("autocomplete.legacy"), false);
     private static final String PROPERTY_SERVICE_LANG = getPropKey("lang");
 
     // Parameters
@@ -64,8 +64,6 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     private static Map<String, Double> elfScalesForType = new HashMap<>();
     private static Map<String, Integer> elfLocationPriority = new HashMap<>();
     private static JSONObject elfLocationTypes = null;
-    private static JSONObject elfNameLanguages = null;
-    private final String locationType = "GEOLOCATOR_CHANNEL.json";
     private String serviceURL = null;
     public GeoLocatorParser elfParser = null;
     private Logger log = LogFactory.getLogger(this.getClass());
@@ -113,15 +111,6 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
 
         log.debug("ServiceURL set to " + getURL());
         readLocationTypes();
-
-        // read available languages
-        try (InputStream languageStream = this.getClass().getResourceAsStream("namelanguage.json");
-             InputStreamReader reader = new InputStreamReader(languageStream)) {
-            elfNameLanguages = JSONHelper.createJSONObject4Tokener(new JSONTokener(reader));
-        } catch (IOException e) {
-            log.warn("Couldn't load language selection from 'namelanguage.json':", e.getMessage());
-        }
-
         elfParser = new GeoLocatorParser(getProperty("service.srs", "EPSG:4326"), this);
 
         try {
@@ -172,15 +161,9 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     }
 
     private InputStream getLocationTypeStream() {
-        InputStream inp2 = this.getClass().getResourceAsStream(locationType);
+        InputStream inp2 = this.getClass().getResourceAsStream("GEOLOCATOR_CHANNEL.json");
         if (inp2 != null) {
             return inp2;
-        }
-        // Try to get user defined setup file
-        try {
-            return new FileInputStream(LOCATIONTYPE_ATTRIBUTES);
-        } catch (Exception e) {
-            log.info("No setup found for location type based scaling in geolocator seach", e);
         }
         throw new RuntimeException("No location types data");
     }
@@ -268,7 +251,7 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
 
         if ("true".equals(searchCriteria.getParamAsString(PARAM_FILTER))) {
             log.debug("Exact search (AU)");
-            
+
             // Exact search limited to AU region - case sensitive - no fuzzy support
             String request = REQUEST_GETFEATUREAU_TEMPLATE.replace(KEY_PLACE_HOLDER, URLEncoder.encode(searchCriteria.getSearchString(), "UTF-8"));
             request = request.replace(KEY_AU_HOLDER, URLEncoder.encode(searchCriteria.getParam(PARAM_REGION).toString(), "UTF-8"));
@@ -276,7 +259,7 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
             buf.append(request);
         } else if ("true".equals(searchCriteria.getParamAsString(PARAM_FUZZY))) {
             log.debug("Fuzzy search");
-            
+
             // Fuzzy search
             buf.append(REQUEST_FUZZY_TEMPLATE.replace(KEY_LANG_HOLDER, lang3));
             buf.append(URLEncoder.encode(searchCriteria.getSearchString(), "UTF-8"));
@@ -286,33 +269,33 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
             if (hasParam(searchCriteria, locationType)) {
                 buf.append("&LOCATIONTYPE" + "=" + searchCriteria.getParam(locationType));
             }
-            
+
             // Name language
             final String nameLanguage = "namelanguage";
             if (hasParam(searchCriteria, nameLanguage)) {
                 buf.append("&NAMELANGUAGE" + "=" + searchCriteria.getParam(nameLanguage));
             }
-            
+
             // Nearest
             final String nearest = "nearest";
             if (hasParam(searchCriteria, nearest)) {
                 buf.append("&NEAREST=" + searchCriteria.getParam(nearest));
                 buf.append("&LON=" + searchCriteria.getParam("lon"));
                 buf.append("&LAT=" + searchCriteria.getParam("lat"));
-                
+
                 // API supports EPSG:4258, EPSG:3034, EPSG:3035 ja EPSG:3857 coordinates
                 buf.append("&SRSNAME=" + searchCriteria.getSRS());
             }
         } else {
             log.debug("Exact search");
-            
+
             // Exact search - case sensitive
             String filter = getFilter(searchCriteria);
             String request = REQUEST_GETFEATURE_TEMPLATE.replace(KEY_LANG_HOLDER, lang3);
             buf.append(request);
             buf.append(filter);
         }
-        
+
         log.debug("Server request: " + buf.toString());
         return IOHelper.readString(getConnection(buf.toString()));
     }
@@ -342,14 +325,6 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
         return obj != null && !obj.toString().isEmpty();
     }
 
-    public JSONObject getElfLocationTypes() {
-        return this.elfLocationTypes;
-    }
-
-    public JSONObject getElfNameLanguages() {
-        return this.elfNameLanguages;
-    }
-
     /**
      * Returns the channel search results.
      *
@@ -376,7 +351,7 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
             ChannelSearchResult result = elfParser.parse(data, searchCriteria.getSRS(), locale, exonym);
 
             // Execute fuzzy search, if no result in exact search (and fuzzy search has not been done already)
-            if (result.getSearchResultItems().size() == 0 && findSearchMethod(searchCriteria).equals(PARAM_NORMAL) && !fuzzyDone) {
+            if (result.getSearchResultItems().isEmpty() && findSearchMethod(searchCriteria).equals(PARAM_NORMAL) && !fuzzyDone) {
                 // Try fuzzy search, if empty
                 searchCriteria.addParam(PARAM_NORMAL, "false");
                 searchCriteria.addParam(PARAM_FUZZY, "true");
@@ -393,19 +368,15 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     }
 
     private String findSearchMethod(SearchCriteria sc) {
-        String method = "unknown";
         if ("true".equals(sc.getParamAsString(PARAM_FILTER))) {
             // Exact search limited to AU region - case sensitive - no fuzzy support
-            method = PARAM_FILTER;
-
+            return PARAM_FILTER;
         } else if ("true".equals(sc.getParamAsString(PARAM_FUZZY))) {
             // Fuzzy search
-            method = PARAM_FUZZY;
-        } else {
-            // Exact search - case sensitive
-            method = PARAM_NORMAL;
+            return PARAM_FUZZY;
         }
-        return method;
+        // Exact search - case sensitive
+        return PARAM_NORMAL;
     }
 
     public Map<String, Double> getElfScalesForType() {
@@ -470,9 +441,72 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
         return combiner.getSortedHits();
     }
 
+    private String getElasticQuery(String query) {
+        return getElasticQuery(query, USE_OLD_AUTOCOMPLETE);
+    }
 
-    protected String getElasticQuery(String query) {
-        // {"normal_search":{"text":"[user input]","completion":{"field":"name_suggest","size":20}},"fuzzy_search":{"text":"[user input]","completion":{"field":"name_suggest","size":20,"fuzzy":{"fuzziness":5}}}}
+    protected String getElasticQuery(String query, boolean useLegacy) {
+        if (useLegacy) {
+            return getLegacyAutocomplete(query);
+        }
+        return getCurrentAutocomplete(query);
+    }
+
+    /*
+    {
+        "suggest": {
+            "placenamesuggest": {
+                "prefix" : "QUERYWORD",
+                "completion": {
+                    "field": "name_suggest",
+                    "skip_duplicates": true
+                }
+            }
+        }
+    }
+    */
+    private String getCurrentAutocomplete(String query) {
+        try {
+            JSONObject placenamesuggest = new JSONObject();
+            // query is insertion, otherlines are just boilerplate structure for query
+            placenamesuggest.putOpt("prefix", query);
+
+            JSONObject completion = new JSONObject("{ 'field': \"name_suggest\", \"skip_duplicates\": true }");
+            placenamesuggest.put("completion", completion);
+
+            JSONObject suggest = new JSONObject();
+            suggest.put("placenamesuggest", placenamesuggest);
+
+            JSONObject root = new JSONObject();
+            root.put("suggest", suggest);
+            return root.toString();
+        } catch (Exception e) {
+            throw new ServiceRuntimeException("Error generating request payload for query: " + query, e);
+        }
+    }
+
+    /*
+        {
+            "normal_search":{
+                "text":"[user input]",
+                "completion": {
+                    "field": "name_suggest",
+                    "size":20
+                }
+            },
+            "fuzzy_search": {
+                "text": "[user input]",
+                "completion": {
+                    "field":"name_suggest",
+                    "size":20,
+                    "fuzzy":{
+                        "fuzziness":5
+                    }
+                }
+            }
+        }
+    */
+    private String getLegacyAutocomplete(String query) {
         JSONObject elasticQueryTemplate = JSONHelper.createJSONObject("{\"normal_search\":{\"completion\":{\"field\":\"name_suggest\",\"size\":20}},\"fuzzy_search\":{\"completion\":{\"field\":\"name_suggest\",\"size\":20,\"fuzzy\":{\"fuzziness\":5}}}}");
         try {
             // set the actual search query
@@ -481,5 +515,4 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
         } catch(Exception ignored) {}
         return elasticQueryTemplate.toString();
     }
-
 }
