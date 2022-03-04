@@ -51,6 +51,7 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     public static final String PROPERTY_AUTOCOMPLETE_URL = PropertyUtil.getOptional(getPropKey("autocomplete.url"));
     public static final String PROPERTY_AUTOCOMPLETE_USERNAME = PropertyUtil.getOptional(getPropKey("autocomplete.userName"));
     public static final String PROPERTY_AUTOCOMPLETE_PASSWORD = PropertyUtil.getOptional(getPropKey("autocomplete.password"));
+    private static final boolean USE_OLD_AUTOCOMPLETE = PropertyUtil.getOptional(getPropKey("autocomplete.legacy"), false);
     private static final String PROPERTY_SERVICE_LANG = getPropKey("lang");
 
     // Parameters
@@ -442,7 +443,67 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
 
 
     protected String getElasticQuery(String query) {
-        // {"normal_search":{"text":"[user input]","completion":{"field":"name_suggest","size":20}},"fuzzy_search":{"text":"[user input]","completion":{"field":"name_suggest","size":20,"fuzzy":{"fuzziness":5}}}}
+        if (USE_OLD_AUTOCOMPLETE) {
+            return getLegacyAutocomplete(query);
+        }
+        return getCurrentAutocomplete(query);
+    }
+
+    /*
+    {
+        "suggest": {
+            "placenamesuggest": {
+                "prefix" : "QUERYWORD",
+                "completion": {
+                    "field": "name_suggest",
+                    "skip_duplicates": true
+                }
+            }
+        }
+    }
+    */
+    private String getCurrentAutocomplete(String query) {
+        try {
+            JSONObject placenamesuggest = new JSONObject();
+            // query is insertion, otherlines are just boilerplate structure for query
+            placenamesuggest.put("prefix", query);
+
+            JSONObject completion = new JSONObject("{ 'field': 'name_suggest', 'skip_duplicates': true ");
+            placenamesuggest.put("completion", completion);
+
+            JSONObject suggest = new JSONObject();
+            suggest.put("placenamesuggest", placenamesuggest);
+
+            JSONObject root = new JSONObject();
+            root.put("suggest", suggest);
+            return root.toString();
+        } catch(Exception ignored) {
+            throw new ServiceRuntimeException("Error generating request payload for query: " + query);
+        }
+    }
+
+    /*
+        {
+            "normal_search":{
+                "text":"[user input]",
+                "completion": {
+                    "field": "name_suggest",
+                    "size":20
+                }
+            },
+            "fuzzy_search": {
+                "text": "[user input]",
+                "completion": {
+                    "field":"name_suggest",
+                    "size":20,
+                    "fuzzy":{
+                        "fuzziness":5
+                    }
+                }
+            }
+        }
+    */
+    private String getLegacyAutocomplete(String query) {
         JSONObject elasticQueryTemplate = JSONHelper.createJSONObject("{\"normal_search\":{\"completion\":{\"field\":\"name_suggest\",\"size\":20}},\"fuzzy_search\":{\"completion\":{\"field\":\"name_suggest\",\"size\":20,\"fuzzy\":{\"fuzziness\":5}}}}");
         try {
             // set the actual search query
@@ -451,5 +512,4 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
         } catch(Exception ignored) {}
         return elasticQueryTemplate.toString();
     }
-
 }
