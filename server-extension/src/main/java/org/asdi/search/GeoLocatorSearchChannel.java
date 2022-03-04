@@ -411,6 +411,9 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
             log.info("Creating autocomplete search url with url:", PROPERTY_AUTOCOMPLETE_URL);
             HttpURLConnection conn = IOHelper.getConnection(PROPERTY_AUTOCOMPLETE_URL,
                     PROPERTY_AUTOCOMPLETE_USERNAME, PROPERTY_AUTOCOMPLETE_PASSWORD);
+            IOHelper.addIdentifierHeaders(conn);
+            IOHelper.writeHeader(conn, IOHelper.HEADER_CONTENTTYPE, IOHelper.CONTENT_TYPE_JSON + ";charset=" + IOHelper.CHARSET_UTF8);
+            IOHelper.writeHeader(conn, IOHelper.HEADER_ACCEPT, IOHelper.CONTENT_TYPE_JSON);
             IOHelper.writeToConnection(conn, getElasticQuery(searchString));
             String result = IOHelper.readString(conn);
             jsonObject = new JSONObject(result);
