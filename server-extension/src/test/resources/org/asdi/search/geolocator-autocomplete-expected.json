@@ -1,0 +1,154 @@
+{
+  "took": 8,
+  "timed_out": false,
+  "_shards": {
+    "total": 1,
+    "successful": 1,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": 0,
+    "max_score": 0.0,
+    "hits": []
+  },
+  "suggest": {
+    "placenamesuggest": [
+      {
+        "text": "hels",
+        "offset": 0,
+        "length": 4,
+        "options": [
+          {
+            "text": "Helsfyr Sinsen",
+            "_index": "asdi",
+            "_type": "placename",
+            "_id": "2880266",
+            "_score": 15.0,
+            "_source": {
+              "names": [
+                {
+                  "name": "Helsfyr Sinsen",
+                  "language": "nor"
+                }
+              ],
+              "country": "Norway",
+              "location_instance_id": "37900523",
+              "location_type": "Administrative units",
+              "x": "10.796778",
+              "y": "59.914611",
+              "name_suggest": {
+                "input": "Helsfyr Sinsen",
+                "weight": "15"
+              }
+            }
+          },
+          {
+            "text": "Helsingfors",
+            "_index": "asdi",
+            "_type": "placename",
+            "_id": "314611",
+            "_score": 15.0,
+            "_source": {
+              "names": [
+                {
+                  "name": "Helsinki",
+                  "language": "fin"
+                },
+                {
+                  "name": "Helsingfors",
+                  "language": "swe"
+                }
+              ],
+              "country": "Finland",
+              "location_instance_id": "33828036",
+              "location_type": "Administrative units",
+              "x": "24.9435367993289",
+              "y": "60.166640738488",
+              "name_suggest": {
+                "input": "Helsingfors",
+                "weight": "15"
+              }
+            }
+          },
+          {
+            "text": "Helsinki",
+            "_index": "asdi",
+            "_type": "placename",
+            "_id": "314610",
+            "_score": 15.0,
+            "_source": {
+              "names": [
+                {
+                  "name": "Helsinki",
+                  "language": "fin"
+                },
+                {
+                  "name": "Helsingfors",
+                  "language": "swe"
+                }
+              ],
+              "country": "Finland",
+              "location_instance_id": "33828036",
+              "location_type": "Administrative units",
+              "x": "24.9435367993289",
+              "y": "60.166640738488",
+              "name_suggest": {
+                "input": "Helsinki",
+                "weight": "15"
+              }
+            }
+          },
+          {
+            "text": "Helsberg",
+            "_index": "asdi",
+            "_type": "placename",
+            "_id": "536507",
+            "_score": 10.0,
+            "_source": {
+              "names": [
+                {
+                  "name": "Helsberg",
+                  "language": "swe"
+                }
+              ],
+              "country": "Finland",
+              "location_instance_id": "34049394",
+              "location_type": "Populated places",
+              "x": "22.6701809673813",
+              "y": "60.4767330369599",
+              "name_suggest": {
+                "input": "Helsberg",
+                "weight": "10"
+              }
+            }
+          },
+          {
+            "text": "Helsinaho",
+            "_index": "asdi",
+            "_type": "placename",
+            "_id": "167607",
+            "_score": 10.0,
+            "_source": {
+              "names": [
+                {
+                  "name": "Helsinaho",
+                  "language": "fin"
+                }
+              ],
+              "country": "Finland",
+              "location_instance_id": "33681855",
+              "location_type": "Populated places",
+              "x": "28.4072723160242",
+              "y": "66.4027507795977",
+              "name_suggest": {
+                "input": "Helsinaho",
+                "weight": "10"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
