@@ -12,7 +12,9 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class GeoLocatorSearchChannelTest {
@@ -68,6 +70,17 @@ public class GeoLocatorSearchChannelTest {
         final JSONObject expected = JSONHelper.createJSONObject("{\"suggest\":{\"placenamesuggest\":{\"completion\":{\"field\":\"name_suggest\",\"skip_duplicates\":true},\"prefix\":\"\\\"}, {\\\"break\\\": []\"}}}");
         final JSONObject actual = JSONHelper.createJSONObject(channel.getElasticQuery("\"}, {\"break\": []", false));
         assertTrue("JSON should not break", JSONHelper.isEqual(expected, actual));
+    }
+
+    @Test
+    public void parseElasticResponseCurrent() throws IOException {
+        String response = IOHelper.readString(getClass().getResourceAsStream("geolocator-autocomplete-expected.json"));
+
+        GeoLocatorSearchChannel channel = new GeoLocatorSearchChannel();
+        final JSONObject actual = JSONHelper.createJSONObject(channel.getElasticQuery("\"}, {\"break\": []", false));
+        List<String> result = channel.parseAutocompleteResults(response, "hels", false);
+        assertEquals("Should get 5 results", 5, result.size());
+        assertEquals("Helsberg should be the second last", "Helsberg", result.get(result.size() - 2));
     }
 
 }

@@ -403,10 +403,9 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
     }
 
     public List<String> doSearchAutocomplete(String searchString) {
-        if(PROPERTY_AUTOCOMPLETE_URL == null || PROPERTY_AUTOCOMPLETE_URL.isEmpty()) {
+        if (PROPERTY_AUTOCOMPLETE_URL == null || PROPERTY_AUTOCOMPLETE_URL.isEmpty()) {
             return Collections.emptyList();
         }
-        JSONObject jsonObject;
         try {
             log.info("Creating autocomplete search url with url:", PROPERTY_AUTOCOMPLETE_URL);
             HttpURLConnection conn = IOHelper.getConnection(PROPERTY_AUTOCOMPLETE_URL,
@@ -416,15 +415,64 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
             IOHelper.writeHeader(conn, IOHelper.HEADER_ACCEPT, IOHelper.CONTENT_TYPE_JSON);
             IOHelper.writeToConnection(conn, getElasticQuery(searchString));
             String result = IOHelper.readString(conn);
-            jsonObject = new JSONObject(result);
+            return parseAutocompleteResults(result, searchString);
         }
         catch (Exception ex) {
             log.error("Couldn't open or read from connection for search channel!");
-            throw new RuntimeException("Couldn't open or read from connection!", ex);
+            throw new ServiceRuntimeException("Couldn't open or read from connection!", ex);
         }
+    }
 
-        HitCombiner combiner = new HitCombiner();
+    private List<String> parseAutocompleteResults(String response, String query) {
+        return parseAutocompleteResults(response, query, USE_OLD_AUTOCOMPLETE);
+
+    }
+
+    protected List<String> parseAutocompleteResults(String response, String query, boolean useLegacy) {
+        if (useLegacy) {
+            return parseAutocompleteResultsLegacy(response, query);
+        }
+        return parseAutocompleteResultsCurrent(response, query);
+
+    }
+    private List<String> parseAutocompleteResultsCurrent(String response, String query) {
         try {
+            JSONObject jsonObject = new JSONObject(response);
+            JSONObject suggest = jsonObject.optJSONObject("suggest");
+            if (suggest == null) {
+                return Collections.emptyList();
+            }
+            JSONArray placenamesuggest = suggest.optJSONArray("placenamesuggest");
+            if (placenamesuggest == null) {
+                return Collections.emptyList();
+            }
+            List<String> results = new ArrayList<>(placenamesuggest.length());
+            for (int i = 0; i < placenamesuggest.length(); i++) {
+                JSONObject item = placenamesuggest.optJSONObject(i);
+                if (item == null || !query.equals(item.optString("text"))) {
+                    continue;
+                }
+                JSONArray options = item.optJSONArray("options");
+                if (options == null) {
+                    continue;
+                }
+                for (int j = 0; j < options.length(); j++) {
+                    JSONObject optItem = options.optJSONObject(j);
+                    results.add(optItem.optString("text"));
+                }
+            }
+            return results;
+
+        } catch (JSONException ex) {
+            log.error("Unexpected autocomplete service JSON response structure!", ex.getMessage());
+        }
+        return Collections.emptyList();
+    }
+
+    private List<String> parseAutocompleteResultsLegacy(String response, String query) {
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            HitCombiner combiner = new HitCombiner();
             JSONArray fuzzyHits = jsonObject.getJSONArray("fuzzy_search").getJSONObject(0).getJSONArray("options");
             for (int i = 0; i < fuzzyHits.length(); i++) {
                 combiner.addHit(fuzzyHits.getJSONObject(i), false);
@@ -433,16 +481,17 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
             JSONArray normalHits = jsonObject.getJSONArray("normal_search").getJSONObject(0).getJSONArray("options");
             for (int i = 0; i < normalHits.length(); i++) {
                 JSONObject hit = normalHits.getJSONObject(i);
-                boolean isExact = searchString.trim().equalsIgnoreCase(hit.getString("text"));
+                boolean isExact = query.trim().equalsIgnoreCase(hit.getString("text"));
                 combiner.addHit(hit, isExact);
             }
+            return combiner.getSortedHits();
         }
         catch (JSONException ex) {
             log.error("Unexpected autocomplete service JSON response structure!", ex.getMessage());
         }
-
-        return combiner.getSortedHits();
+        return Collections.emptyList();
     }
+
 
     private String getElasticQuery(String query) {
         return getElasticQuery(query, USE_OLD_AUTOCOMPLETE);
