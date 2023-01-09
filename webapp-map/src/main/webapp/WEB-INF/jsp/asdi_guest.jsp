@@ -5,7 +5,6 @@
 <html>
 <head>
     <title>Arctic SDI - ${viewName}</title>
-    <link rel="shortcut icon" href="/Oskari${path}/css/asdi_logoplugin_logo.png" type="image/png" />
     <meta charset="utf-8"/>
     <!-- ############# css ################# -->
     <link type="text/css" rel="stylesheet"
