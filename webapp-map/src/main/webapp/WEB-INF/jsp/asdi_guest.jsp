@@ -126,18 +126,7 @@
     </div>
     <div id="language-selector-root"></div>
 </nav>
-<div id="contentMap" class="oskariui container-fluid">
-    <div id="menutoolbar" class="container-fluid"></div>
-    <div class="row-fluid oskariui-mode-content" style="height: 100%; background-color:white;">
-        <div class="oskariui-left"></div>
-        <div class="span12 oskariui-center" style="height: 100%; margin: 0;">
-            <div id="mapdiv"></div>
-        </div>
-        <div class="oskari-closed oskariui-right">
-            <div id="mapdivB"></div>
-        </div>
-    </div>
-</div>
+<%-- Oskari will create the map container here --%>
 
 <!-- ############# Javascript ################# -->
 
