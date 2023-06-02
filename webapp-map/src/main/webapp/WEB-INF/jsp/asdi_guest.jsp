@@ -6,6 +6,7 @@
 <head>
     <title>Arctic SDI - ${viewName}</title>
     <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- ############# css ################# -->
     <link type="text/css" rel="stylesheet"
           href="//fonts.googleapis.com/css?family=Open+Sans:400,400italic,700,700italic,800,800italic,600italic,600"/>
