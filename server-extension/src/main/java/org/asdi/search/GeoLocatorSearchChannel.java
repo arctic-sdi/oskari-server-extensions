@@ -407,7 +407,7 @@ public class GeoLocatorSearchChannel extends SearchChannel implements SearchAuto
             return Collections.emptyList();
         }
         try {
-            log.info("Creating autocomplete search url with url:", PROPERTY_AUTOCOMPLETE_URL);
+            log.debug("Creating autocomplete search url with url:", PROPERTY_AUTOCOMPLETE_URL);
             HttpURLConnection conn = IOHelper.getConnection(PROPERTY_AUTOCOMPLETE_URL,
                     PROPERTY_AUTOCOMPLETE_USERNAME, PROPERTY_AUTOCOMPLETE_PASSWORD);
             IOHelper.addIdentifierHeaders(conn);
