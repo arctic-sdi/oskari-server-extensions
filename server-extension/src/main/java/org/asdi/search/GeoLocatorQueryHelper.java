@@ -8,12 +8,12 @@ package org.asdi.search;
  */
 
 import fi.nls.oskari.service.ServiceRuntimeException;
+import org.geotools.api.filter.Filter;
+import org.geotools.api.filter.FilterFactory;
+import org.geotools.api.filter.PropertyIsEqualTo;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.xsd.Configuration;
 import org.geotools.xsd.Encoder;
-import org.opengis.filter.Filter;
-import org.opengis.filter.FilterFactory2;
-import org.opengis.filter.PropertyIsEqualTo;
 import org.xml.sax.helpers.NamespaceSupport;
 
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ public class GeoLocatorQueryHelper {
      * @return
      */
     public String getFilter(String userinput, String country) {
-        FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+        FilterFactory ff = CommonFactoryFinder.getFilterFactory();
         Filter userInputFilter = getUserInputFilter(userinput, ff);
         Filter adminFilter = getAdminFilter(country, ff);
 
@@ -59,7 +59,7 @@ public class GeoLocatorQueryHelper {
         }
     }
 
-    private Filter getUserInputFilter(String input, FilterFactory2 ff) {
+    private Filter getUserInputFilter(String input, FilterFactory ff) {
         if(input == null || input.isEmpty()) {
             return null;
         }
@@ -71,7 +71,7 @@ public class GeoLocatorQueryHelper {
         return moi;
     }
 
-    private Filter getAdminFilter(String country, FilterFactory2 ff) {
+    private Filter getAdminFilter(String country, FilterFactory ff) {
         if(country == null || country.isEmpty()) {
             return null;
         }
@@ -91,7 +91,7 @@ public class GeoLocatorQueryHelper {
         return filterList.get(0);
     }
 
-    private Filter createOptionalAndFilter(FilterFactory2 ff, Filter first, Filter second) {
+    private Filter createOptionalAndFilter(FilterFactory ff, Filter first, Filter second) {
         if(ff == null || (first == null && second == null)) {
             return null;
         }

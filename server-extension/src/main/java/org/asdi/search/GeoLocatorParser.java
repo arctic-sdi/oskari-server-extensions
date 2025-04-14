@@ -14,12 +14,12 @@ import fi.nls.oskari.domain.geo.Point;
 import fi.nls.oskari.log.LogFactory;
 import fi.nls.oskari.log.Logger;
 import fi.nls.oskari.map.geometry.ProjectionHelper;
-import fi.nls.oskari.util.XmlHelper;
+import org.geotools.api.feature.Property;
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeatureType;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
-import org.opengis.feature.Property;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
+import org.oskari.xml.XmlHelper;
 import org.w3c.dom.Document;
 
 import javax.xml.parsers.DocumentBuilder;

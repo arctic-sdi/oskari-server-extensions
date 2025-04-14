@@ -1,7 +1,7 @@
 package flyway.asdistats;
 
-import fi.nls.oskari.domain.Role;
-import fi.nls.oskari.domain.User;
+import org.oskari.user.Role;
+import org.oskari.user.User;
 import fi.nls.oskari.map.layer.OskariLayerService;
 import fi.nls.oskari.service.OskariComponentManager;
 import fi.nls.oskari.service.ServiceException;
