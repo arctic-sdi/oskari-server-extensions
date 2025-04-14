@@ -2,21 +2,23 @@ package org.asdi.search;
 
 import fi.nls.oskari.util.IOHelper;
 import fi.nls.oskari.util.PropertyUtil;
-import org.junit.After;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 /**
  * Created by SMAKINEN on 7.9.2017.
  */
 public class GeoLocatorCountriesTest {
 
-    @After
+    @AfterEach
     public void tearDown() {
         PropertyUtil.clearProperties();
     }
@@ -28,14 +30,14 @@ public class GeoLocatorCountriesTest {
         String response = IOHelper.readString(getClass().getResourceAsStream("geolocator-country-filter-response.xml"));
         Map<String, String> map = countries.parseCountryMap(response);
 
-        assertEquals("Should get 9 values", 9 , map.size());
+        assertEquals(9 , map.size(), "Should get 9 values");
         countries.setCountryMap(map);
 
         Set<String> countrySet = countries.getCountries();
-        assertEquals("Should get 8 values", 8 , countrySet.size());
+        assertEquals(8 , countrySet.size(), "Should get 8 values");
 
         String countryName = countries.getAdminCountry(new Locale("en"), "Norway polar - GN");
-        assertEquals("Countryname should match expected", "Norway", countryName);
+        assertEquals("Norway", countryName, "Countryname should match expected");
 
     }
 }
