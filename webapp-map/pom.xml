@@ -83,7 +83,27 @@
             <artifactId>postgresql</artifactId>
         </dependency>
 
-        <!-- JSTL not needed for Jetty, but required by Tomcat -->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jakarta.servlet.jsp</groupId>
+            <artifactId>jakarta.servlet.jsp-api</artifactId>
+        </dependency>
+        <!-- JSTL API is required to prevent jakarta.servlet.ServletException:
+        Handler processing failed: java.lang.NoClassDefFoundError: jakarta/servlet/jsp/jstl/core/Config at runtime with JSP
+        This happens immediately by just opening the geoportal page -->
+        <dependency>
+            <groupId>jakarta.servlet.jsp.jstl</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl-api</artifactId>
+        </dependency>
+        <!-- JSTL IMPL from glassfish -->
+        <dependency>
+            <groupId>org.glassfish.web</groupId>
+            <artifactId>jakarta.servlet.jsp.jstl</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>javax.mail-api</artifactId>
