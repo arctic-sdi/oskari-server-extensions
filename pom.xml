@@ -11,8 +11,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
-        <oskari.version>2.15.0-SNAPSHOT</oskari.version>
+        <java.version>17</java.version>
+        <oskari.version>3.1.0-SNAPSHOT</oskari.version>
         <xmlunit.version>1.6</xmlunit.version>
     </properties>
 
@@ -40,7 +40,13 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
-
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>

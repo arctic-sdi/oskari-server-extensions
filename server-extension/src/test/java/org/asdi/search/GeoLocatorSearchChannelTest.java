@@ -7,15 +7,15 @@ import fi.nls.oskari.util.PropertyUtil;
 import org.custommonkey.xmlunit.Diff;
 import org.custommonkey.xmlunit.XMLUnit;
 import org.json.JSONObject;
-import org.junit.After;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GeoLocatorSearchChannelTest {
 
@@ -25,7 +25,7 @@ public class GeoLocatorSearchChannelTest {
         this.wildcardQueryXML = IOHelper.readString(getClass().getResourceAsStream("GeoLocatorWildcardQuery.xml"));
     }
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() {
         // use relaxed comparison settings
         XMLUnit.setIgnoreComments(true);
@@ -34,7 +34,7 @@ public class GeoLocatorSearchChannelTest {
         XMLUnit.setIgnoreAttributeOrder(true);
     }
 
-    @After
+    @AfterEach
     public void tearDown() {
         PropertyUtil.clearProperties();
     }
@@ -49,11 +49,11 @@ public class GeoLocatorSearchChannelTest {
         SearchCriteria searchCriteria = new SearchCriteria();
         searchCriteria.setSearchString("Hel*ki");
 
-        assertTrue("Channel should detect wildcard in query", channel.hasWildcard(searchCriteria.getSearchString()));
+        assertTrue(channel.hasWildcard(searchCriteria.getSearchString()), "Channel should detect wildcard in query");
 
         String xml = channel.getWildcardQuery(searchCriteria);
         Diff xmlDiff = new Diff(wildcardQueryXML, xml);
-        assertTrue("Should get expected query " + xmlDiff, xmlDiff.similar());
+        assertTrue(xmlDiff.similar(), "Should get expected query " + xmlDiff);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class GeoLocatorSearchChannelTest {
         GeoLocatorSearchChannel channel = new GeoLocatorSearchChannel();
         final JSONObject expected = JSONHelper.createJSONObject("{\"normal_search\":{\"text\":\"\\\"}, {\\\"break\\\": []\",\"completion\":{\"field\":\"name_suggest\",\"size\":20}},\"fuzzy_search\":{\"text\":\"\\\"}, {\\\"break\\\": []\",\"completion\":{\"field\":\"name_suggest\",\"size\":20,\"fuzzy\":{\"fuzziness\":5}}}}");
         final JSONObject actual = JSONHelper.createJSONObject(channel.getElasticQuery("\"}, {\"break\": []", true));
-        assertTrue("JSON should not break", JSONHelper.isEqual(expected, actual));
+        assertTrue(JSONHelper.isEqual(expected, actual), "JSON should not break");
     }
 
     @Test
@@ -69,7 +69,7 @@ public class GeoLocatorSearchChannelTest {
         GeoLocatorSearchChannel channel = new GeoLocatorSearchChannel();
         final JSONObject expected = JSONHelper.createJSONObject("{\"suggest\":{\"placenamesuggest\":{\"completion\":{\"field\":\"name_suggest\",\"skip_duplicates\":true},\"prefix\":\"\\\"}, {\\\"break\\\": []\"}}}");
         final JSONObject actual = JSONHelper.createJSONObject(channel.getElasticQuery("\"}, {\"break\": []", false));
-        assertTrue("JSON should not break", JSONHelper.isEqual(expected, actual));
+        assertTrue(JSONHelper.isEqual(expected, actual), "JSON should not break");
     }
 
     @Test
@@ -79,8 +79,8 @@ public class GeoLocatorSearchChannelTest {
         GeoLocatorSearchChannel channel = new GeoLocatorSearchChannel();
         final JSONObject actual = JSONHelper.createJSONObject(channel.getElasticQuery("\"}, {\"break\": []", false));
         List<String> result = channel.parseAutocompleteResults(response, "hels", false);
-        assertEquals("Should get 5 results", 5, result.size());
-        assertEquals("Helsberg should be the second last", "Helsberg", result.get(result.size() - 2));
+        assertEquals(5, result.size(), "Should get 5 results");
+        assertEquals("Helsberg", result.get(result.size() - 2), "Helsberg should be the second last");
     }
 
 }
