@@ -27,6 +27,7 @@ public class GeoLocatorSearchChannelTest {
 
     @BeforeAll
     public static void setUp() {
+        PropertyUtil.clearProperties();
         // use relaxed comparison settings
         XMLUnit.setIgnoreComments(true);
         XMLUnit.setIgnoreWhitespace(true);

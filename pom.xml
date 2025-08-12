@@ -12,7 +12,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>17</java.version>
-        <oskari.version>3.1.0-SNAPSHOT</oskari.version>
+        <oskari.version>3.0.2</oskari.version>
         <xmlunit.version>1.6</xmlunit.version>
     </properties>
 
